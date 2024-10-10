@@ -16,10 +16,6 @@ This repository contains the software for [Systematic Feature Design for Cycle L
 # Files
 "params_results.csv", "autoML_results.csv", and "designed_results.csv" show the median and maximum RMSE and MAPE among five-fold outer loop for every agnostic models, autoML models, and ML models with designed features for every models constructed in this study, respectively.
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE.md file for details.
-
 ## Acknowledgement
 
 This work was supported by the Toyota Research Institute through D3BATT: Center for Data-Driven Design of Li-Ion Batteries.
