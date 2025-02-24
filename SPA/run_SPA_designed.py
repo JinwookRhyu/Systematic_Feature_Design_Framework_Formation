@@ -1,7 +1,7 @@
 from SPA import main_SPA
 from pandas import read_excel
 
-dir_datafile = "C:/Users/ChemeGrad2021/PycharmProjects/Formation_feature_design/SPA_data_designed"
+dir_datafile = "C:/Users/ChemeGrad2021/PycharmProjects/Formation_feature_design/Features_designed"
 import glob, os
 
 data_type = "log_B_Q_V"
@@ -23,9 +23,9 @@ for ii in range(len(data_name_list)):
 
     if Data.shape[1] > 1:
         if if_logtransform:
-            main_SPA(data_name="SPA_data_designed/log_" + data_name,
+            main_SPA(data_name="Features_designed/log_" + data_name,
                      main_data=dir_datafile + "/" + data_name + ".xlsx",
-                     test_data = "SPA_data_designed/" + test_data,
+                     test_data = "Features_designed/" + test_data,
                      save_name="SPA_results_designed/log_" + data_name + ".pkl",
                      interrogation_plot_name = "log_" + data_name,
                      model_name=['XGB', 'RF', 'SVR', 'ALVEN', 'LCEN', 'EN', 'RR', 'PLS'],
@@ -33,9 +33,9 @@ for ii in range(len(data_name_list)):
                      plot_interrogation=True, nested_cv=False, num_outer = 5, K_fold=10, Nr=1, alpha_num=20, degree=[1],
                      log_transform=if_logtransform)
         else:
-            main_SPA(data_name="SPA_data_designed/" + data_name,
+            main_SPA(data_name="Features_designed/" + data_name,
                      main_data=dir_datafile + "/" + data_name + ".xlsx",
-                     test_data="SPA_data_designed/" + test_data,
+                     test_data="Features_designed/" + test_data,
                      save_name="SPA_results_designed/" + data_name + ".pkl",
                      interrogation_plot_name=data_name,
                      model_name=['XGB', 'RF', 'SVR', 'ALVEN', 'LCEN', 'EN', 'RR', 'PLS'],
