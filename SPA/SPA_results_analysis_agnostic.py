@@ -31,7 +31,7 @@ group_list = [g for g in range(np.max(group))]
 np.random.RandomState(42).shuffle(group_list)
 split = np.array_split(group_list, 5)
 
-Data_original = read_excel("SPA_data_agnostic/" + file_name + ".xlsx", header = None).values
+Data_original = read_excel("Features_agnostic/" + file_name + ".xlsx", header = None).values
 if "tsfresh" in file_name:
     X_original = Data_original[:, 1:]
     y_original = Data_original[:, 0].reshape(-1, 1)
