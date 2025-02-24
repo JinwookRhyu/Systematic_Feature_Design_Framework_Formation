@@ -2,6 +2,7 @@ from SPA import main_SPA
 from pandas import read_excel
 
 dir_datafile = "C:/Users/ChemeGrad2021/PycharmProjects/Formation_feature_design/Features_tsfresh_autoML"
+# Navigate to the directory with Features_tsfresh_autoML folder. This SPA code also can be used for agnostic models when replacing "Features_tsfresh_autoML" with "Features_agnostic" and also from "SPA_results_autoML" with "SPA_results_agnostic"
 import glob, os
 data_name_list = os.listdir(dir_datafile)
 if_logtransform = True
