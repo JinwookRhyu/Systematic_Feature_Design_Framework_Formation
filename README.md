@@ -2,7 +2,7 @@
 
 This repository contains the software for [Systematic Feature Design for Cycle Life Prediction of Lithium-Ion Batteries During Formation] which can be used for designing predictive yet interpretable features for cycle life prediction based only on experimental data during the formation step.
 
-![Figure_2.pdf](https://github.com/user-attachments/files/18939109/Figure_2.pdf)
+![Framework.pdf](https://github.com/JinwookRhyu/Systematic_Feature_Design_Framework_Formation/blob/Framework.pdf?raw=true)
 
 # Code
 
