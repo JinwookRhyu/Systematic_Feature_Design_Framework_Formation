@@ -6,18 +6,18 @@ import pickle
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
-dir_pklfile = "C:/Users/ChemeGrad2021/PyCharmProjects/Formation_feature_design/050324/SPA_results_params"
+dir_pklfile = "C:/Users/Jinwook/PyCharm_projects/Formation_feature/SPA_results_params"
 import glob, os
 data_name_list = os.listdir(dir_pklfile)
-data_name_list = ["protocol_params_reduced"]
+data_name_list = ["log_protocol_params_reduced"]
 
 for ii in range(len(data_name_list)):
 
     data_name = data_name_list[ii].replace('.pkl', '')
 
-    with open("050324/SPA_results_params/" + data_name + ".pkl", 'rb') as file:
+    with open("SPA_results_params/" + data_name + ".pkl", 'rb') as file:
         history = pickle.load(file)
-    model_name_list = ['EN']
+    model_name_list = ['XGB']
     model_name_display_list = model_name_list
 
     rmse_train = []
@@ -28,7 +28,7 @@ for ii in range(len(data_name_list)):
     num_nest_display = []
     for model_name in model_name_list:
 
-        save_name = "050324/SPA_plots_params/" + data_name + "_Fit_" + model_name + ".png"
+        save_name = "SPA_plots_params/" + data_name + "_Fit_" + model_name + ".png"
 
         y_train_list = []
         yhat_train_list = []
@@ -87,12 +87,14 @@ for ii in range(len(data_name_list)):
                 df1['Split Type'] = np.repeat('Test', len(y_test))
 
                 df = pd.concat([df, df1], ignore_index=True)
-
+                sns.set(font_scale=1.2)
+                sns.set_theme(style="whitegrid")
                 sns.violinplot(
                    data=df,
                    x='Model Type', y='Error', cut = 0, fill=False, gap=.2, palette= [c, c],
                    hue='Split Type', split=True, density_norm='area', inner='quart', legend=False, ax=ax[2])
                 ax[2].collections[2*i].set_edgecolor(c)
+                ax[2].set_ylim(0, 450)
 
                 df2 = pd.DataFrame(100 * np.divide(abs(y_train - yhat_train), y_train).flatten(),
                                    columns=['Relative Error'])
@@ -111,6 +113,7 @@ for ii in range(len(data_name_list)):
                     x='Model Type', y='Relative Error', cut = 0, fill=False, gap=.2, palette= [c, c],
                     hue='Split Type', split=True, density_norm='area', inner='quart', legend=False, ax=ax[3])
                 ax[3].collections[2 * i].set_edgecolor(c)
+                ax[3].set_ylim(0, 60)
             # ax.legend(loc='lower right', fontsize = 10)
 
             sm.qqline(ax=ax[0], line='45', fmt='k--')
@@ -135,8 +138,8 @@ for ii in range(len(data_name_list)):
                 ax[3].scatter(x=0.04, y=test_nest_mape[i], color=c, edgecolors='k', s=100)
 
 
-            ax[2].set_title('RMSE from nested CV')
-            ax[3].set_title('MAPE from nested CV')
+            ax[2].set_title('RMSE violin plot')
+            ax[3].set_title('MAPE violin plot')
 
             plt.tight_layout()
 
@@ -164,10 +167,10 @@ for ii in range(len(data_name_list)):
     ax = sns.violinplot(
         data=df4,
         x='Model Type', y='RMSE',
-        hue='Split Type', split=True, palette="colorblind", scale='count', inner='stick')
+        hue='Split Type', split=True, palette="colorblind", density_norm='count', inner='stick')
     ax.set_title('RMSE distribution using nested CV')
     plt.savefig(
-        "050324/SPA_plots_params/" + data_name + "_Violin_RMSE.png")
+        "SPA_plots_params/" + data_name + "_Violin_RMSE.png")
 
     df6 = pd.DataFrame(mape_train.flatten(), columns=['MAPE'])
     df6['Model Type'] = np.repeat(model_names_display, num_nest_display)
@@ -182,10 +185,10 @@ for ii in range(len(data_name_list)):
     ax = sns.violinplot(
         data=df6,
         x='Model Type', y='MAPE',
-        hue='Split Type', split=True, palette="colorblind", scale='count', inner='stick')
+        hue='Split Type', split=True, palette="colorblind", density_norm='count', inner='stick')
     ax.set_title('MAPE distribution using nested CV')
     plt.savefig(
-        "050324/SPA_plots_params/" + data_name + "_Violin_MAPE.png")
+        "SPA_plots_params/" + data_name + "_Violin_MAPE.png")
 
 
 

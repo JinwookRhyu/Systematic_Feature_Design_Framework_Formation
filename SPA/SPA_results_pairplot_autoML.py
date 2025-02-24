@@ -9,7 +9,7 @@ import statsmodels.api as sm
 dir_pklfile = "C:/Users/Jinwook/PyCharm_projects/Formation_feature/SPA_results_autoML"
 import glob, os
 data_name_list = os.listdir(dir_pklfile)
-data_name_list = ["log_B_V_t_features_univariate_tsfresh_3.5", "log_B_V_t_features_univariate_tsfresh_4.5"]
+data_name_list = ["log_B_Q_V_features_univariate_4.5"]
 
 for ii in range(len(data_name_list)):
 
@@ -18,7 +18,7 @@ for ii in range(len(data_name_list)):
     with open("SPA_results_autoML/" + data_name + ".pkl", 'rb') as file:
         history = pickle.load(file)
 
-    model_name_list = ['EN', 'RF', 'SVR', 'ALVEN', 'LCEN', 'XGB']
+    model_name_list = ['SVR']
     model_name_display_list = model_name_list
 
     rmse_train = []
@@ -88,12 +88,14 @@ for ii in range(len(data_name_list)):
                 df1['Split Type'] = np.repeat('Test', len(y_test))
 
                 df = pd.concat([df, df1], ignore_index=True)
-
+                sns.set(font_scale=1.2)
+                sns.set_theme(style="whitegrid")
                 sns.violinplot(
                    data=df,
                    x='Model Type', y='Error', cut = 0, fill=False, gap=.2, palette= [c, c],
                    hue='Split Type', split=True, density_norm='area', inner='quart', legend=False, ax=ax[2])
                 ax[2].collections[2*i].set_edgecolor(c)
+                ax[2].set_ylim(0, 450)
 
                 df2 = pd.DataFrame(100 * np.divide(abs(y_train - yhat_train), y_train).flatten(),
                                    columns=['Relative Error'])
@@ -112,6 +114,7 @@ for ii in range(len(data_name_list)):
                     x='Model Type', y='Relative Error', cut = 0, fill=False, gap=.2, palette= [c, c],
                     hue='Split Type', split=True, density_norm='area', inner='quart', legend=False, ax=ax[3])
                 ax[3].collections[2 * i].set_edgecolor(c)
+                ax[3].set_ylim(0, 60)
             # ax.legend(loc='lower right', fontsize = 10)
 
             sm.qqline(ax=ax[0], line='45', fmt='k--')
@@ -136,8 +139,8 @@ for ii in range(len(data_name_list)):
                 ax[3].scatter(x=0.04, y=test_nest_mape[i], color=c, edgecolors='k', s=100)
 
 
-            ax[2].set_title('RMSE from nested CV')
-            ax[3].set_title('MAPE from nested CV')
+            ax[2].set_title('RMSE violin plot')
+            ax[3].set_title('MAPE violin plot')
 
             plt.tight_layout()
 
@@ -165,7 +168,7 @@ for ii in range(len(data_name_list)):
     ax = sns.violinplot(
         data=df4,
         x='Model Type', y='RMSE',
-        hue='Split Type', split=True, palette="colorblind", scale='count', inner='stick')
+        hue='Split Type', split=True, palette="colorblind", density_norm='count', inner='stick')
     ax.set_title('RMSE distribution using nested CV')
     plt.savefig(
         "SPA_plots_autoML/" + data_name + "_Violin_RMSE.png")
@@ -183,7 +186,7 @@ for ii in range(len(data_name_list)):
     ax = sns.violinplot(
         data=df6,
         x='Model Type', y='MAPE',
-        hue='Split Type', split=True, palette="colorblind", scale='count', inner='stick')
+        hue='Split Type', split=True, palette="colorblind", density_norm='count', inner='stick')
     ax.set_title('MAPE distribution using nested CV')
     plt.savefig(
         "SPA_plots_autoML/" + data_name + "_Violin_MAPE.png")
