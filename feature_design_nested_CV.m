@@ -7,8 +7,8 @@ legend_position = 'northwest'; % legend location
 plot_ylim = [-1.2, 1.2]; % ylim for plot
 if_logtransform = true; % Whether to log-transform the data or not
 id_outer_list = 1:5; % Index for outer loops
-num_lambda_show = 2; % Number of lamdas to plot
-if_savematrix = true; % Whether to save the dataset of selected features
+num_lambda_show = 10; % Number of lamdas to plot
+if_savematrix = false; % Whether to save the dataset of selected features
 
 % Robustness and interpretability thresholds as in Table 5
 threshold_dtw_ratio_others = 0.7;
@@ -484,13 +484,13 @@ for m = 1:length(id_outer_list)
         % Save the obtained feature matrix
         if if_savematrix
             if if_logtransform
-                writematrix([X_features_train_final, y_train_outer], "log_" + data_type + "_train_Outer_" + num2str(id_outer) + ".xlsx")
-                writematrix([X_features_test_final, y_test_outer], "log_" + data_type + "_test_Outer_" + num2str(id_outer) + ".xlsx")
-                writematrix(protocols(train_id_outer), "log_" + data_type + "_grouplabel_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix([X_features_train_final, y_train_outer], "designed_features/log_" + data_type + "_train_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix([X_features_test_final, y_test_outer], "designed_features/log_" + data_type + "_test_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix(protocols(train_id_outer), "designed_features/log_" + data_type + "_grouplabel_Outer_" + num2str(id_outer) + ".xlsx")
             else
-                writematrix([X_features_train_final, y_train_outer], data_type + "_train_Outer_" + num2str(id_outer) + ".xlsx")
-                writematrix([X_features_test_final, y_test_outer], data_type + "_test_Outer_" + num2str(id_outer) + ".xlsx")
-                writematrix(protocols(train_id_outer), data_type + "_grouplabel_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix([X_features_train_final, y_train_outer], "designed_features/" + data_type + "_train_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix([X_features_test_final, y_test_outer], "designed_features/" + data_type + "_test_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix(protocols(train_id_outer), "designed_features/" + data_type + "_grouplabel_Outer_" + num2str(id_outer) + ".xlsx")
             end
         end
         
@@ -617,14 +617,12 @@ for m = 1:length(id_outer_list)
         ylim([plot_ylim(1), plot_ylim(2)])
         yline(0, '--', 'LineWidth', 2, 'HandleVisibility','off')
         xlim([min(X_label), max(X_label)])
+        set(gca,'XTickLabelMode','auto')
         a = get(gca,'XTickLabel');
         set(gca,'XTickLabel',a,'fontsize',30)
         set(gcf, 'WindowState', 'maximized');        
         
-        if id_outer == 1
-            colormap(jet)
-            cb = colorbar();
-        end
+        colormap(jet);
 
         [X_train_final, X_train_final_C, X_train_final_S] = normalize(X_features_train_final);
         [y_train_final, y_train_final_C, y_train_final_S] = normalize(y_train_outer);
