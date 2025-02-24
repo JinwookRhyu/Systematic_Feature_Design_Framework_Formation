@@ -6,24 +6,22 @@ import pickle
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
-dir_pklfile = "C:/Users/Jinwook/PyCharm_projects/Formation_feature/SPA_results"
+dir_pklfile = "C:/Users/Jinwook/PyCharm_projects/Formation_feature/SPA_results_autoML"
 import glob, os
 data_name_list = os.listdir(dir_pklfile)
 
-#data_name_list = ["B_Q_t_features_univariate_1.5.pkl"]
-
 model_name_list_all = ['SVR', 'RF', 'EN', 'ALVEN', 'LCEN', 'XGB']
 
-df_data = [[0]*12 for i in range(len(data_name_list) * len(model_name_list_all))]
+df_data = [[0]*42 for i in range(len(data_name_list) * len(model_name_list_all))]
 
 ind_model = 0
 
-for ii in range(len(data_name_list)-8):
+for ii in range(len(data_name_list)):
 
     data_name = data_name_list[ii].replace('.pkl', '')
     print(data_name)
 
-    with open("SPA_results/" + data_name + ".pkl", 'rb') as file:
+    with open("SPA_results_autoML/" + data_name + ".pkl", 'rb') as file:
         history = pickle.load(file)
 
     model_name_list = [i for i in history]
@@ -98,14 +96,43 @@ for ii in range(len(data_name_list)-8):
                     df_data[ind_model][1] = items[1] + "_" + items[2]
                     df_data[ind_model][2] = float(items[5])
 
+            train_nest_rmse_pair = np.full((int(0.5 * num_nest * (num_nest + 1)), ), np.nan)
+            test_nest_rmse_pair = np.full((int(0.5 * num_nest * (num_nest + 1)),), np.nan)
+            train_nest_mape_pair = np.full((int(0.5 * num_nest * (num_nest + 1)),), np.nan)
+            test_nest_mape_pair = np.full((int(0.5 * num_nest * (num_nest + 1)),), np.nan)
+            k_pair = 0
+            for iii in range(num_nest):
+                for jjj in range(iii+1):
+                    train_nest_rmse_pair[k_pair] = 0.5 * (train_nest_rmse[iii] + train_nest_rmse[jjj])
+                    test_nest_rmse_pair[k_pair] = 0.5 * (test_nest_rmse[iii] + test_nest_rmse[jjj])
+                    train_nest_mape_pair[k_pair] = 0.5 * (train_nest_mape[iii] + train_nest_mape[jjj])
+                    test_nest_mape_pair[k_pair] = 0.5 * (test_nest_mape[iii] + test_nest_mape[jjj])
+                    k_pair = k_pair + 1
+
+
             df_data[ind_model][5] = model_name
-            df_data[ind_model][6] = np.median(train_nest_rmse)
-            df_data[ind_model][7] = np.median(test_nest_rmse)
-            df_data[ind_model][8] = np.max(test_nest_rmse)
-            df_data[ind_model][9] = np.median(train_nest_mape)
-            df_data[ind_model][10] = np.median(test_nest_mape)
-            df_data[ind_model][11] = np.max(test_nest_mape)
+            df_data[ind_model][6:11] = train_nest_rmse
+            df_data[ind_model][11:16] = test_nest_rmse
+            df_data[ind_model][16:21] = train_nest_mape
+            df_data[ind_model][21:26] = test_nest_mape
+            df_data[ind_model][26] = np.mean(train_nest_rmse)
+            df_data[ind_model][27] = np.mean(test_nest_rmse)
+            df_data[ind_model][28] = np.mean(train_nest_mape)
+            df_data[ind_model][29] = np.mean(test_nest_mape)
+            df_data[ind_model][30] = np.median(train_nest_rmse)
+            df_data[ind_model][31] = np.median(test_nest_rmse)
+            df_data[ind_model][32] = np.median(train_nest_mape)
+            df_data[ind_model][33] = np.median(test_nest_mape)
+            df_data[ind_model][34] = np.max(train_nest_rmse)
+            df_data[ind_model][35] = np.max(test_nest_rmse)
+            df_data[ind_model][36] = np.max(train_nest_mape)
+            df_data[ind_model][37] = np.max(test_nest_mape)
+            df_data[ind_model][38] = np.median(train_nest_rmse_pair)
+            df_data[ind_model][39] = np.median(test_nest_rmse_pair)
+            df_data[ind_model][40] = np.median(train_nest_mape_pair)
+            df_data[ind_model][41] = np.median(test_nest_mape_pair)
             ind_model += 1
 
-df = pd.DataFrame(df_data, columns=['Region', 'State_var', 'Significance', 'if_tsfresh', 'if_log', 'model', 'med_train_rmse', 'med_test_rmse', 'max_test_rmse', 'med_train_mape', 'med_test_mape', 'max_test_mape'])
+
+df = pd.DataFrame(df_data, columns=['Region', 'State_var', 'Significance', 'if_tsfresh', 'if_log', 'model', 'train_rmse_1', 'train_rmse_2', 'train_rmse_3', 'train_rmse_4', 'train_rmse_5', 'test_rmse_1', 'test_rmse_2', 'test_rmse_3', 'test_rmse_4', 'test_rmse_5', 'train_mape_1', 'train_mape_2', 'train_mape_3', 'train_mape_4', 'train_mape_5', 'test_mape_1', 'test_mape_2', 'test_mape_3', 'test_mape_4', 'test_mape_5', 'mean_train_rmse', 'mean_test_rmse', 'mean_train_mape', 'mean_test_mape', 'med_train_rmse', 'med_test_rmse', 'med_train_mape', 'med_test_mape', 'max_train_rmse', 'max_test_rmse', 'max_train_mape', 'max_test_mape', 'HL_train_rmse', 'HL_test_rmse', 'HL_train_mape', 'HL_test_mape'])
 df.to_csv('autoML_results.csv')
