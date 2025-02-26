@@ -3,12 +3,15 @@ from pandas import read_excel
 import glob, os
 
 mode = 'autoML' # agnostic or autoML
+if_logtransform = True
 
 if mode == 'agnostic':
     dir_datafile = os.path.dirname(os.getcwd()) + "/Features_agnostic"
 
+    if not os.path.exists(os.path.dirname(os.getcwd()) + "/SPA_results_agnostic"):
+        os.mkdir(os.path.dirname(os.getcwd()) + "/SPA_results_agnostic")
+
     data_name_list = os.listdir(dir_datafile)
-    if_logtransform = True
     
     for ii in range(len(data_name_list)):
         data_name = data_name_list[ii].replace('.xlsx', '')
@@ -37,7 +40,9 @@ elif mode == 'autoML':
     dir_datafile = os.path.dirname(os.getcwd()) + "/Features_tsfresh_autoML"
     # Navigate to the directory with Features_tsfresh_autoML folder. This SPA code also can be used for agnostic models when replacing "Features_tsfresh_autoML" with "Features_agnostic" and also from "SPA_results_autoML" with "SPA_results_agnostic"
     data_name_list = os.listdir(dir_datafile)
-    if_logtransform = True
+
+    if not os.path.exists(os.path.dirname(os.getcwd()) + "/SPA_results_autoML"):
+        os.mkdir(os.path.dirname(os.getcwd()) + "/SPA_results_autoML")
     
     for ii in range(len(data_name_list)):
         data_name = data_name_list[ii].replace('.xlsx', '')
