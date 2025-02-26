@@ -2,8 +2,8 @@ from SPA import main_SPA
 from pandas import read_excel
 import glob, os
 
-mode = 'autoML' # agnostic or autoML
-if_logtransform = True
+mode = 'autoML' # 'agnostic' / 'autoML' / 'designed'
+if_logtransform = True # True / False
 
 if mode == 'agnostic':
     dir_datafile = os.path.dirname(os.getcwd()) + "/Features_agnostic"
