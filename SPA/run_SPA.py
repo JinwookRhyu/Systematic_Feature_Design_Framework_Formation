@@ -71,6 +71,9 @@ elif mode == 'designed':
     dir_datafile = os.path.dirname(os.getcwd()) + "/Features_designed"
     data_name_list = os.listdir(dir_datafile)
 
+    if not os.path.exists(os.path.dirname(os.getcwd()) + "/SPA_results_designed"):
+        os.mkdir(os.path.dirname(os.getcwd()) + "/SPA_results_designed")
+
     data_type = "log_B_Q_V"
     data_name_list = []
     test_data_list = []
