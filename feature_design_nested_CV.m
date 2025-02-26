@@ -484,13 +484,13 @@ for m = 1:length(id_outer_list)
         % Save the obtained feature matrix
         if if_savematrix
             if if_logtransform
-                writematrix([X_features_train_final, y_train_outer], "designed_features/log_" + data_type + "_train_Outer_" + num2str(id_outer) + ".xlsx")
-                writematrix([X_features_test_final, y_test_outer], "designed_features/log_" + data_type + "_test_Outer_" + num2str(id_outer) + ".xlsx")
-                writematrix(protocols(train_id_outer), "designed_features/log_" + data_type + "_grouplabel_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix([X_features_train_final, y_train_outer], "Features_designed/log_" + data_type + "_train_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix([X_features_test_final, y_test_outer], "Features_designed/log_" + data_type + "_test_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix(protocols(train_id_outer), "Features_designed/log_" + data_type + "_grouplabel_Outer_" + num2str(id_outer) + ".xlsx")
             else
-                writematrix([X_features_train_final, y_train_outer], "designed_features/" + data_type + "_train_Outer_" + num2str(id_outer) + ".xlsx")
-                writematrix([X_features_test_final, y_test_outer], "designed_features/" + data_type + "_test_Outer_" + num2str(id_outer) + ".xlsx")
-                writematrix(protocols(train_id_outer), "designed_features/" + data_type + "_grouplabel_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix([X_features_train_final, y_train_outer], "Features_designed/" + data_type + "_train_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix([X_features_test_final, y_test_outer], "Features_designed/" + data_type + "_test_Outer_" + num2str(id_outer) + ".xlsx")
+                writematrix(protocols(train_id_outer), "Features_designed/" + data_type + "_grouplabel_Outer_" + num2str(id_outer) + ".xlsx")
             end
         end
         
