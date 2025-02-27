@@ -8,9 +8,9 @@ plot_ylim = [-1.2, 1.2]; % ylim for plot
 if_logtransform = true; % Whether to log-transform the data or not
 id_outer_list = 1:5; % Index for outer loops
 num_lambda_show = 10; % Number of lamdas to plot
-if_savematrix = false; % Whether to save the dataset of selected features
+if_savematrix = true; % Whether to save the dataset of selected features
 
-% Robustness and interpretability thresholds as in Table 5
+% Robustness and interpretability thresholds as in Table S2
 threshold_dtw_ratio_others = 0.7;
 threshold_path_length = 5;
 
@@ -190,7 +190,7 @@ for m = 1:length(id_outer_list)
     % Calculate predictiveness metric
     mean_MAPE = mean(squeeze(MAPE_test_list(id_outer, :, 1:n_lambda)));
     [min_MAPE, ind_min_MAPE] = min(mean_MAPE);
-    % Predictiveness threshold as in Table 5
+    % Predictiveness threshold as in Table S2
     threshold_MAPE = min_MAPE + std(squeeze(MAPE_test_list(id_outer, :, ind_min_MAPE))) / sqrt(5);
 
     % Calculate robustness and interpretability metrics
@@ -203,7 +203,7 @@ for m = 1:length(id_outer_list)
     alarm_path_length = mean_path_length >= threshold_path_length;
     alarm_total = (alarm_MAPE + alarm_dtw_ratio_others + alarm_path_length) > 0;
 
-    % Plot blue and red regions as in Figure 3a-c
+    % Plot blue and red regions as in Figure S5a-c
     figure(); clf();
     t = tiledlayout(3,6);
     nexttile(1,[1 2])
@@ -318,7 +318,7 @@ for m = 1:length(id_outer_list)
         lambda_ind = chosen_lambda_inds(m);
         cmap_black = gray(length(lambda_show)+1);
         
-        % Plot beta's as a function of lambda as in Figure 3d
+        % Plot beta's as a function of lambda as in Figure S5d
         for kk = 1:length(lambda_show)
             lambda = lambda_list(id_outer, lambda_show(kk));
             cvx_begin
@@ -350,7 +350,7 @@ for m = 1:length(id_outer_list)
         end
         ylabel('\beta', 'FontSize', fontsize);
 
-        % Plot beta's at each inner loop with the optimal lambda as in Figure 3e
+        % Plot beta's at each inner loop with the optimal lambda as in Figure S5e
         nexttile(10,[2 3])
         for id_inner = 1:5
             legend_name = "\beta^{(" + num2str(id_inner) + ")} at \lambda = " + num2str(round(lambda_list(id_outer, max(ind_normal)), 4));
@@ -441,7 +441,7 @@ for m = 1:length(id_outer_list)
             minimize(0.5*sum((y_train_std - X_train_cen * beta_FL).^2) + lambda * norm(beta_FL(1:999) - beta_FL(2:1000), 1))
         cvx_end
         
-        % Find partition boundaries as in Figure 4
+        % Find partition boundaries as in Figure 3A
         x0_filtered = find_x0_filtered(beta_FL);
         x0 = [1; x0_filtered; 1000];
         round(X_label(x0), 2)
@@ -483,6 +483,9 @@ for m = 1:length(id_outer_list)
         
         % Save the obtained feature matrix
         if if_savematrix
+            if ~exist("Features_designed", 'dir')
+                mkdir("Features_designed");
+            end
             if if_logtransform
                 writematrix([X_features_train_final, y_train_outer], "Features_designed/log_" + data_type + "_train_Outer_" + num2str(id_outer) + ".xlsx")
                 writematrix([X_features_test_final, y_test_outer], "Features_designed/log_" + data_type + "_test_Outer_" + num2str(id_outer) + ".xlsx")
@@ -516,7 +519,7 @@ for m = 1:length(id_outer_list)
         end
         x0_diff = setdiff(x0_filtered, x0_merge);
         
-        % Plot the location of final boundaries on top of f(x), df/dx, and d^2f/dx^2 curves as in Figure 5c-e
+        % Plot the location of final boundaries on top of f(x), df/dx, and d^2f/dx^2 curves as in Figure 3B-D
         figure(); clf();
         subplot(3,1,1);
         box on
@@ -692,7 +695,7 @@ function path_length = cal_path_length(beta_list)
 end
 
 function plot_redbox(alarm, lambdas, xl, yl)
-    % Plot red box as in Figures 3a-c
+    % Plot red box as in Figures S5a-c
     CC = bwconncomp(alarm);
     for k = 1:CC.NumObjects
         if length(CC.PixelIdxList{1, k}) > 1
@@ -720,7 +723,7 @@ function plot_redbox(alarm, lambdas, xl, yl)
 end
 
 function plot_bluebox(alarm, lambdas, xl, yl)
-    % Plot blue box as in Figures 3a-c
+    % Plot blue box as in Figures S5a-c
     CC = bwconncomp(~alarm);
     for k = 1:CC.NumObjects
         if length(CC.PixelIdxList{1, k}) > 1
@@ -748,7 +751,7 @@ function plot_bluebox(alarm, lambdas, xl, yl)
 end
 
 function plot_dottedline(alarm, lambdas, xl, yl)
-    % Plot the boundaries of red and blue boxes in Figure 3
+    % Plot the boundaries of red and blue boxes in Figure S5
     ind_lambda = find(diff(alarm > 0));
     for k = 1:length(ind_lambda)
         xline(0.5*(lambdas(ind_lambda) + lambdas(ind_lambda+1)), '--', 'LineWidth', 2, 'HandleVisibility','off')
@@ -759,7 +762,7 @@ end
 
 
 function [xticklabelname, x0] = determine_merge(X_train_outer, x0, foldid_outer, X_raw, beta_avg, xticklabelname, merge_threshold, if_plot)
-    % Merge sections as in Algorithm 1
+    % Merge sections as in Algorithm S1
     MAPE_train_list_1 = nan * ones(5, length(x0)-1);
     RMSE_train_list_1 = nan * ones(5, length(x0)-1);
     NRMSE_train_list_1 = nan * ones(5, length(x0)-1);
@@ -888,7 +891,7 @@ function [xticklabelname, x0] = determine_merge(X_train_outer, x0, foldid_outer,
 end
 
 function [X_features_train, X_features_test, featurenames, featurenames_V] = downselect_features(R, X_features_train, X_features_test, featurenames, featurenames_V, corr_threshold)
-    % Downselect features as in Algorithm 2
+    % Downselect features as in Algorithm S2
     ind_features = [];
     ind_keep = find(abs(R(:, end)) >= corr_threshold);
     R_reduced = R(ind_keep, ind_keep);

@@ -1,50 +1,59 @@
 close all; clear; clc;
 % Scatter plot of RMSE vs. MAPE of autoML models for promisingness of the input data
-[~, ~, X_raw] = xlsread("autoML_results.csv");
-X_raw = X_raw(2:end, :);
+[~, ~, X_autoML] = xlsread("summarized_results/autoML_results.csv");
+X_autoML = X_autoML(2:end, :);
 RMSE_xlim_end = 400;
 MAPE_xlim_end = 40;
-X_raw = sortrows(X_raw, 1);
+X_autoML = sortrows(X_autoML, 1);
 ind_best_autoML = 1687;
 
-ind_A_Q_V = X_raw(:,2) == "A" & X_raw(:,3) == "Q_V";
-ind_A_t_V = X_raw(:,2) == "A" & X_raw(:,3) == "t_V";
-ind_B_Q_V = X_raw(:,2) == "B" & X_raw(:,3) == "Q_V";
-ind_B_V_t = X_raw(:,2) == "B" & X_raw(:,3) == "V_t";
-ind_C_Q_V = X_raw(:,2) == "C" & X_raw(:,3) == "Q_V";
-ind_C_V_t = X_raw(:,2) == "C" & X_raw(:,3) == "V_t";
+ind_A_Q_V = X_autoML(:,2) == "A" & X_autoML(:,3) == "Q_V";
+ind_A_t_V = X_autoML(:,2) == "A" & X_autoML(:,3) == "t_V";
+ind_B_Q_V = X_autoML(:,2) == "B" & X_autoML(:,3) == "Q_V";
+ind_B_V_t = X_autoML(:,2) == "B" & X_autoML(:,3) == "V_t";
+ind_C_Q_V = X_autoML(:,2) == "C" & X_autoML(:,3) == "Q_V";
+ind_C_V_t = X_autoML(:,2) == "C" & X_autoML(:,3) == "V_t";
 
-agnostic_mean_MAPE = 10.96197587;
-agnostic_med_MAPE = 11.0631359542646;
-agnostic_max_MAPE = 11.3537550822691;
-agnostic_HL_MAPE = 10.953701815;
-agnostic_mean_RMSE = 106.49829284;
-agnostic_med_RMSE = 107.10266305472;
-agnostic_max_RMSE = 124.805853780002;
-agnostic_HL_RMSE = 107.1026631;
-designed_mean_MAPE = 9.84123878;
-designed_med_MAPE = 9.19544075356795;
-designed_max_MAPE = 11.9266480274902;
-designed_HL_MAPE = 9.58908087;
-designed_mean_RMSE = 97.85469668;
-designed_med_RMSE = 97.3348811149964;
-designed_max_RMSE = 108.544099482514;
-designed_HL_RMSE = 97.442234315;
+[~, ~, X_agnostic] = xlsread("summarized_results/agnostic_results.csv");
+rank_agnostic = cell2mat(X_agnostic(2:end,32)) + cell2mat(X_agnostic(2:end,36));
+[~, order_rank_agnostic] = sort(rank_agnostic);
+ind_agnostic = order_rank_agnostic(1) + 1;
+agnostic_mean_MAPE = cell2mat(X_agnostic(ind_agnostic, 28));
+agnostic_med_MAPE = cell2mat(X_agnostic(ind_agnostic, 32));
+agnostic_max_MAPE = cell2mat(X_agnostic(ind_agnostic, 36));
+agnostic_HL_MAPE = cell2mat(X_agnostic(ind_agnostic, 40));
+agnostic_mean_RMSE = cell2mat(X_agnostic(ind_agnostic, 26));
+agnostic_med_RMSE = cell2mat(X_agnostic(ind_agnostic, 30));
+agnostic_max_RMSE = cell2mat(X_agnostic(ind_agnostic, 34));
+agnostic_HL_RMSE = cell2mat(X_agnostic(ind_agnostic, 38));
+
+[~, ~, X_designed] = xlsread("summarized_results/designed_results.csv");
+rank_designed = cell2mat(X_designed(2:end,31)) + cell2mat(X_designed(2:end,35));
+[~, order_rank_designed] = sort(rank_designed);
+ind_designed = order_rank_designed(1) + 1;
+designed_mean_MAPE = cell2mat(X_designed(ind_designed, 27));
+designed_med_MAPE = cell2mat(X_designed(ind_designed, 31));
+designed_max_MAPE = cell2mat(X_designed(ind_designed, 35));
+designed_HL_MAPE = cell2mat(X_designed(ind_designed, 39));
+designed_mean_RMSE = cell2mat(X_designed(ind_designed, 25));
+designed_med_RMSE = cell2mat(X_designed(ind_designed, 29));
+designed_max_RMSE = cell2mat(X_designed(ind_designed, 33));
+designed_HL_RMSE = cell2mat(X_designed(ind_designed, 37));
 
 figure(); clf();
 hold on
 yline(agnostic_max_MAPE,'--', 'LineWidth', 3, 'HandleVisibility','off');
 xline(agnostic_med_MAPE,'--', 'LineWidth', 3, 'HandleVisibility','off');
 plot(linspace(8, 18, 10), linspace(agnostic_med_MAPE + agnostic_max_MAPE - 8, agnostic_med_MAPE + agnostic_max_MAPE - 18, 10), '--r', 'LineWidth', 3, 'HandleVisibility','off')
-scatter(cell2mat(X_raw(ind_A_Q_V, 35)), cell2mat(X_raw(ind_A_Q_V, 39)), 50, [0 0.4470 0.5410], 'filled')
-scatter(cell2mat(X_raw(ind_A_t_V, 35)), cell2mat(X_raw(ind_A_t_V, 39)), 50, [0.6500 0.3250 0.0980], 'filled')
-scatter(cell2mat(X_raw(ind_B_Q_V, 35)), cell2mat(X_raw(ind_B_Q_V, 39)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
-scatter(cell2mat(X_raw(ind_B_V_t, 35)), cell2mat(X_raw(ind_B_V_t, 39)), 70, 'g', 'x', 'LineWidth', 2)
-scatter(cell2mat(X_raw(ind_C_Q_V, 35)), cell2mat(X_raw(ind_C_Q_V, 39)), 50, 'm', '^', 'LineWidth', 1)
-scatter(cell2mat(X_raw(ind_C_V_t, 35)), cell2mat(X_raw(ind_C_V_t, 39)), 50, 'c', '^', 'LineWidth', 1)
+scatter(cell2mat(X_autoML(ind_A_Q_V, 35)), cell2mat(X_autoML(ind_A_Q_V, 39)), 50, [0 0.4470 0.5410], 'filled')
+scatter(cell2mat(X_autoML(ind_A_t_V, 35)), cell2mat(X_autoML(ind_A_t_V, 39)), 50, [0.6500 0.3250 0.0980], 'filled')
+scatter(cell2mat(X_autoML(ind_B_Q_V, 35)), cell2mat(X_autoML(ind_B_Q_V, 39)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
+scatter(cell2mat(X_autoML(ind_B_V_t, 35)), cell2mat(X_autoML(ind_B_V_t, 39)), 70, 'g', 'x', 'LineWidth', 2)
+scatter(cell2mat(X_autoML(ind_C_Q_V, 35)), cell2mat(X_autoML(ind_C_Q_V, 39)), 50, 'm', '^', 'LineWidth', 1)
+scatter(cell2mat(X_autoML(ind_C_V_t, 35)), cell2mat(X_autoML(ind_C_V_t, 39)), 50, 'c', '^', 'LineWidth', 1)
 scatter(agnostic_med_MAPE, agnostic_max_MAPE, 800, 'r', 'filled', 'pentagram', 'LineWidth', 1)
 scatter(designed_med_MAPE, designed_max_MAPE, 800, 'b', 'filled', 'pentagram', 'LineWidth', 1)
-scatter(cell2mat(X_raw(ind_best_autoML, 35)), cell2mat(X_raw(ind_best_autoML, 39)), 400, 'k', 'x', 'LineWidth', 4)
+scatter(cell2mat(X_autoML(ind_best_autoML, 35)), cell2mat(X_autoML(ind_best_autoML, 39)), 400, 'k', 'x', 'LineWidth', 4)
 xlim([8, 18])
 ylim([10, 20])
 %legend({'$Q^{\rm{A}}(V)$', '$t^{\rm{A}}(V)$', '$Q^{\rm{B}}(V)$' '$V^{\rm{B}}(\tilde{t})$' '$Q^{\rm{C}}(V)$', '$V^{\rm{C}}(\tilde{t})$', 'agnostic', 'designed'}, 'location', 'northeast', 'Interpreter','latex')
@@ -55,22 +64,22 @@ fontsize(gcf, 20, "points")
 xlabel('Median MAPE')
 ylabel('Max MAPE')
 title('Promisingness of each input data (MAPE)', 'FontSize', 30);
-saveas(gcf, "promisingness_MAPE.png")
+%saveas(gcf, "promisingness_MAPE.png")
 
 figure(); clf();
 hold on
 yline(agnostic_max_RMSE,'--', 'LineWidth', 3, 'HandleVisibility','off');
 xline(agnostic_med_RMSE,'--', 'LineWidth', 3, 'HandleVisibility','off');
 plot(linspace(80, 180, 10), linspace(agnostic_med_RMSE + agnostic_max_RMSE - 80, agnostic_med_RMSE + agnostic_max_RMSE - 180, 10), '--r', 'LineWidth', 3, 'HandleVisibility','off')
-scatter(cell2mat(X_raw(ind_A_Q_V, 33)), cell2mat(X_raw(ind_A_Q_V, 37)), 50, [0 0.4470 0.5410], 'filled')
-scatter(cell2mat(X_raw(ind_A_t_V, 33)), cell2mat(X_raw(ind_A_t_V, 37)), 50, [0.6500 0.3250 0.0980], 'filled')
-scatter(cell2mat(X_raw(ind_B_Q_V, 33)), cell2mat(X_raw(ind_B_Q_V, 37)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
-scatter(cell2mat(X_raw(ind_B_V_t, 33)), cell2mat(X_raw(ind_B_V_t, 37)), 70, 'g', 'x', 'LineWidth', 2)
-scatter(cell2mat(X_raw(ind_C_Q_V, 33)), cell2mat(X_raw(ind_C_Q_V, 37)), 50, 'm', '^', 'LineWidth', 1)
-scatter(cell2mat(X_raw(ind_C_V_t, 33)), cell2mat(X_raw(ind_C_V_t, 37)), 50, 'c', '^', 'LineWidth', 1)
+scatter(cell2mat(X_autoML(ind_A_Q_V, 33)), cell2mat(X_autoML(ind_A_Q_V, 37)), 50, [0 0.4470 0.5410], 'filled')
+scatter(cell2mat(X_autoML(ind_A_t_V, 33)), cell2mat(X_autoML(ind_A_t_V, 37)), 50, [0.6500 0.3250 0.0980], 'filled')
+scatter(cell2mat(X_autoML(ind_B_Q_V, 33)), cell2mat(X_autoML(ind_B_Q_V, 37)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
+scatter(cell2mat(X_autoML(ind_B_V_t, 33)), cell2mat(X_autoML(ind_B_V_t, 37)), 70, 'g', 'x', 'LineWidth', 2)
+scatter(cell2mat(X_autoML(ind_C_Q_V, 33)), cell2mat(X_autoML(ind_C_Q_V, 37)), 50, 'm', '^', 'LineWidth', 1)
+scatter(cell2mat(X_autoML(ind_C_V_t, 33)), cell2mat(X_autoML(ind_C_V_t, 37)), 50, 'c', '^', 'LineWidth', 1)
 scatter(agnostic_med_RMSE, agnostic_max_RMSE, 800, 'r', 'filled', 'pentagram', 'LineWidth', 1)
 scatter(designed_med_RMSE, designed_max_RMSE, 800, 'b', 'filled', 'pentagram', 'LineWidth', 1)
-scatter(cell2mat(X_raw(ind_best_autoML, 33)), cell2mat(X_raw(ind_best_autoML, 37)), 400, 'k', 'x', 'LineWidth', 4)
+scatter(cell2mat(X_autoML(ind_best_autoML, 33)), cell2mat(X_autoML(ind_best_autoML, 37)), 400, 'k', 'x', 'LineWidth', 4)
 xlim([80, 180])
 ylim([100, 200])
 %legend({'$Q^{\rm{A}}(V)$', '$t^{\rm{A}}(V)$', '$Q^{\rm{B}}(V)$' '$V^{\rm{B}}(\tilde{t})$' '$Q^{\rm{C}}(V)$', '$V^{\rm{C}}(\tilde{t})$', 'agnostic', 'designed'}, 'location', 'northeast', 'Interpreter','latex')
@@ -81,7 +90,7 @@ fontsize(gcf, 20, "points")
 xlabel('Median RMSE')
 ylabel('Max RMSE')
 title('Promisingness of each input data (RMSE)', 'FontSize', 30);
-saveas(gcf, "promisingness_RMSE.png")
+%saveas(gcf, "promisingness_RMSE.png")
 
 figure(); clf();
 [ha, pos] = tight_subplot(2,2,[.13 .13],[.08 .03],[.1 .05]);
@@ -89,10 +98,10 @@ axes(ha(1));
 hold on
 yline(agnostic_mean_RMSE,'--', 'LineWidth', 3, 'HandleVisibility','off');
 xline(agnostic_mean_MAPE,'--', 'LineWidth', 3, 'HandleVisibility','off');
-scatter(cell2mat(X_raw(ind_B_Q_V, 31)), cell2mat(X_raw(ind_B_Q_V, 29)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
+scatter(cell2mat(X_autoML(ind_B_Q_V, 31)), cell2mat(X_autoML(ind_B_Q_V, 29)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
 scatter(agnostic_mean_MAPE, agnostic_mean_RMSE, 800, 'r', 'filled', 'pentagram', 'LineWidth', 1)
 scatter(designed_mean_MAPE, designed_mean_RMSE, 800, 'b', 'filled', 'pentagram', 'LineWidth', 1)
-scatter(cell2mat(X_raw(ind_best_autoML, 31)), cell2mat(X_raw(ind_best_autoML, 29)), 400, 'k', 'x', 'LineWidth', 4)
+scatter(cell2mat(X_autoML(ind_best_autoML, 31)), cell2mat(X_autoML(ind_best_autoML, 29)), 400, 'k', 'x', 'LineWidth', 4)
 xlim([8, 14])
 ylim([80, 140])
 %legend({'autoML', 'agnostic', 'designed'}, 'location', 'northeast', 'Interpreter','latex')
@@ -108,10 +117,10 @@ axes(ha(2));
 hold on
 yline(agnostic_HL_RMSE,'--', 'LineWidth', 3, 'HandleVisibility','off');
 xline(agnostic_HL_MAPE,'--', 'LineWidth', 3, 'HandleVisibility','off');
-scatter(cell2mat(X_raw(ind_B_Q_V, 43)), cell2mat(X_raw(ind_B_Q_V, 41)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
+scatter(cell2mat(X_autoML(ind_B_Q_V, 43)), cell2mat(X_autoML(ind_B_Q_V, 41)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
 scatter(agnostic_HL_MAPE, agnostic_HL_RMSE, 800, 'r', 'filled', 'pentagram', 'LineWidth', 1)
 scatter(designed_HL_MAPE, designed_HL_RMSE, 800, 'b', 'filled', 'pentagram', 'LineWidth', 1)
-scatter(cell2mat(X_raw(ind_best_autoML, 43)), cell2mat(X_raw(ind_best_autoML, 41)), 400, 'k', 'x', 'LineWidth', 4)
+scatter(cell2mat(X_autoML(ind_best_autoML, 43)), cell2mat(X_autoML(ind_best_autoML, 41)), 400, 'k', 'x', 'LineWidth', 4)
 xlim([8, 14])
 ylim([80, 140])
 %legend({'autoML', 'agnostic', 'designed'}, 'location', 'northeast', 'Interpreter','latex')
@@ -127,10 +136,10 @@ axes(ha(3));
 hold on
 yline(agnostic_med_RMSE,'--', 'LineWidth', 3, 'HandleVisibility','off');
 xline(agnostic_med_MAPE,'--', 'LineWidth', 3, 'HandleVisibility','off');
-scatter(cell2mat(X_raw(ind_B_Q_V, 35)), cell2mat(X_raw(ind_B_Q_V, 33)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
+scatter(cell2mat(X_autoML(ind_B_Q_V, 35)), cell2mat(X_autoML(ind_B_Q_V, 33)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
 scatter(agnostic_med_MAPE, agnostic_med_RMSE, 800, 'r', 'filled', 'pentagram', 'LineWidth', 1)
 scatter(designed_med_MAPE, designed_med_RMSE, 800, 'b', 'filled', 'pentagram', 'LineWidth', 1)
-scatter(cell2mat(X_raw(ind_best_autoML, 35)), cell2mat(X_raw(ind_best_autoML, 33)), 400, 'k', 'x', 'LineWidth', 4)
+scatter(cell2mat(X_autoML(ind_best_autoML, 35)), cell2mat(X_autoML(ind_best_autoML, 33)), 400, 'k', 'x', 'LineWidth', 4)
 xlim([8, 14])
 ylim([80, 140])
 %legend({'autoML', 'agnostic', 'designed'}, 'location', 'northeast', 'Interpreter','latex')
@@ -146,10 +155,10 @@ axes(ha(4));
 hold on
 yline(agnostic_max_RMSE,'--', 'LineWidth', 3, 'HandleVisibility','off');
 xline(agnostic_max_MAPE,'--', 'LineWidth', 3, 'HandleVisibility','off');
-scatter(cell2mat(X_raw(ind_B_Q_V, 39)), cell2mat(X_raw(ind_B_Q_V, 37)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
+scatter(cell2mat(X_autoML(ind_B_Q_V, 39)), cell2mat(X_autoML(ind_B_Q_V, 37)), 70, [0.5 0.5 0.5], 'x', 'LineWidth', 2)
 scatter(agnostic_max_MAPE, agnostic_max_RMSE, 800, 'r', 'filled', 'pentagram', 'LineWidth', 1)
 scatter(designed_max_MAPE, designed_max_RMSE, 800, 'b', 'filled', 'pentagram', 'LineWidth', 1)
-scatter(cell2mat(X_raw(ind_best_autoML, 39)), cell2mat(X_raw(ind_best_autoML, 37)), 400, 'k', 'x', 'LineWidth', 4)
+scatter(cell2mat(X_autoML(ind_best_autoML, 39)), cell2mat(X_autoML(ind_best_autoML, 37)), 400, 'k', 'x', 'LineWidth', 4)
 xlim([10, 18])
 ylim([100, 250])
 %legend({'autoML', 'agnostic', 'designed'}, 'location', 'northeast', 'Interpreter','latex')
@@ -204,80 +213,11 @@ for i = 1:62
     end
 end
 
-figure(); clf();
-subplot(2, 1, 1)
-bar(1:31, summary_stats(1:31, 1:4))
-hold on
-yline(0.2, '--')
-ylim([0, 0.35])
-set(gca,'XTick', 1:31); 
-set(gca,'XTickLabelMode','auto')
-a = get(gca,'XTickLabel');
-set(gca,'XTickLabel',a,'fontsize',15);
-grid on
-subplot(2, 1, 2)
-bar(32:62, summary_stats(32:62, 1:4))
-hold on
-yline(0.2, '--')
-ylim([0, 0.35])
-set(gca,'XTick', 32:62); 
-set(gca,'XTickLabelMode','auto')
-a = get(gca,'XTickLabel');
-set(gca,'XTickLabel',a,'fontsize',15);
-grid on
-set(gcf, 'WindowState', 'maximized');
+
+%%
 
 ind_fast = [48, 49, 51, 52, 54, 56, 59, 60, 61, 62];
 ind_55 = [2, 5, 10, 16, 23, 31, 33, 35, 37];
-figure(); clf();
-subplot(2, 1, 1)
-bar(1:length(ind_fast), summary_stats(ind_fast, 1:4))
-hold on
-yline(0.15, '--')
-set(gca,'XTick', ind_fast); 
-set(gca,'XTickLabelMode','auto')
-a = get(gca,'XTickLabel');
-set(gca,'XTickLabel',a,'fontsize',15);
-grid minor
-subplot(2, 1, 2)
-bar(1:length(ind_55), summary_stats(ind_55, 1:4))
-hold on
-yline(0.15, '--')
-set(gca,'XTick', ind_55); 
-set(gca,'XTickLabelMode','auto')
-a = get(gca,'XTickLabel');
-set(gca,'XTickLabel',a,'fontsize',15);
-grid minor
-set(gcf, 'WindowState', 'maximized');
-
-figure(); clf();
-subplot(2, 1, 1)
-bar(1:31, summary_stats(1:31, 9:12))
-hold on
-yline(0.1, '--')
-ylim([0, 0.25])
-set(gca,'XTick', 1:31); 
-set(gca,'XTickLabelMode','auto')
-a = get(gca,'XTickLabel');
-set(gca,'XTickLabel',a,'fontsize',15);
-grid minor
-subplot(2, 1, 2)
-bar(32:62, summary_stats(32:62, 9:12))
-hold on
-yline(0.1, '--')
-ylim([0, 0.25])
-set(gca,'XTick', 32:62); 
-set(gca,'XTickLabelMode','auto')
-a = get(gca,'XTickLabel');
-set(gca,'XTickLabel',a,'fontsize',15);
-grid minor
-set(gcf, 'WindowState', 'maximized');
-
-find((summary_stats(:, 2) > 0) & (summary_stats(:, 2) - max(summary_stats(:, [3, 4]), [], 2) > 0.05))'
-find((summary_stats(:, 3) > 0) & (summary_stats(:, 3) - max(summary_stats(:, [2, 4]), [], 2) > 0.05))'
-find((summary_stats(:, 4) > 0) & (summary_stats(:, 4) - max(summary_stats(:, [2, 3]), [], 2) > 0.05))'
-
-%%
 
 [~, ind_sort] = sort(summary_stats(:,13));
 
@@ -333,9 +273,9 @@ for i = 1:4
     hold on
     
     ind_odd = find((y_min > y_max_true) | (y_max < y_min_true));
-    ind_odd_fast = intersect(ind_odd, ind_fast_rank)'
-    ind_odd_55 = intersect(ind_odd, ind_55_rank)'
-    ind_odd_others = intersect(ind_odd, ind_others)'
+    ind_odd_fast = intersect(ind_odd, ind_fast_rank)';
+    ind_odd_55 = intersect(ind_odd, ind_55_rank)';
+    ind_odd_others = intersect(ind_odd, ind_others)';
    
     if i > 1
         h = boxplot(cell2mat(grouped_true_data), group_labels, 'Colors', [0.7 0.7 0.7], 'Symbol', 'k.');
@@ -459,9 +399,9 @@ for kk = 1:length(i_list)
     hold on
     
     ind_odd = find((y_min > y_max_true) | (y_max < y_min_true));
-    ind_odd_fast = intersect(ind_odd, ind_fast_rank)'
-    ind_odd_55 = intersect(ind_odd, ind_55_rank)'
-    ind_odd_others = intersect(ind_odd, ind_others)'
+    ind_odd_fast = intersect(ind_odd, ind_fast_rank)';
+    ind_odd_55 = intersect(ind_odd, ind_55_rank)';
+    ind_odd_others = intersect(ind_odd, ind_others)';
    
     if i > 1
         h = boxplot(cell2mat(grouped_true_data), group_labels, 'Colors', [0.7 0.7 0.7], 'Symbol', 'k.');
@@ -531,7 +471,7 @@ end
 %% Performance of R_LS feature
 
 fontsize = 16;
-df_R_LS = xlsread("R_LS_formation_dataset.csv");
+df_R_LS = xlsread("R_LS_formation_dataset.xlsx");
 id_isnan = logical(~isnan(df_R_LS(:, 11)) .* ~isnan(df_R_LS(:, 12)) .* ~isnan(df_R_LS(:, 13)));
 T = df_R_LS(id_isnan, 5);
 SoC = df_R_LS(id_isnan, 11);
