@@ -31,6 +31,15 @@ This repository contains the software for [Systematic Feature Design for Cycle L
 * We also attached the "prediction_results.xlsx" file for a quick summary.
 * "figures.m" is a MATLAB code that generates key figures used in the manuscript.
 
+# How to simulate system using physics-based model? (related code can be found at 10.5281/zenodo.14916092)
+
+* The physics based model is run using the MATLAB script ZZ_test_T_variations_v2.m. The editable parameters and the savepath in the 'out' directory can be specified. For the paper's figure regarding the physics based model, a specific parameter set was used which called MATLAB user-defined function Z_FINAL_parameter_specific_run_v2.m. The source code is found in the path 'from_cluster/20240907_parameter_specific'.
+* In Script ZZ_test_T_variations_v2.m, the first line of the script defines the savepath. Lines 2-9 indicate the editable parameters. Note that running this simulation, especially at large resistance distributions can take on order of hours to days due to the construction of the battery simulation software.
+
+# How do I plot the electrochemical signatures and distributions visualized in Figure 6? (related code can be found at 10.5281/zenodo.14916092)
+
+* The figure 6 results come from a simulation found under the filepath 'from_cluster/20240907_parameter_specific/out/parameter_set_146_45_Tref35_good/results.mat'. Script ZZ_FINAL_plot_distributions_best.m plots the resistance or rate constant distribution from the best identified parameter set, and Script ZZ_FINAL_plot_esignatures.m plots the dQ/dV and d2Q/dV2 features from the best identified parameter set.
+
 ## Acknowledgement
 
 This work was supported by the Toyota Research Institute through D3BATT: Center for Data-Driven Design of Li-Ion Batteries.
