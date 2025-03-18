@@ -17,6 +17,7 @@ This repository contains the software accompanying the paper [Systematic Feature
 # How to extract "autoML" features using "tsfresh" package?
 
 * We run the "tsfresh_feature_extraction.ipynb" code in the "tsfresh_feature_extraction" folder. This code stores the autoML features in three folders: "Features_tsfresh_autoML", "Features_tsfresh_autoML_labeled", and "Features_tsfresh_autoML_fulllist". The first folder will be used for constructing ML models, whereas the other two are generated to check which autoML features were used. We deposited the zip files for each folder at Zenodo.
+* Details on the tsfresh package can be found at https://tsfresh.readthedocs.io/en/latest/
 
 # How to construct ML models using "SPA" package?
 
