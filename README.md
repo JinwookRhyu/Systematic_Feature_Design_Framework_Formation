@@ -1,6 +1,6 @@
 # Systematic Feature Design for Cycle Life Prediction of Lithium-Ion Batteries During Formation
 
-This repository contains the software accompanying the paper [Systematic Feature Design for Cycle Life Prediction of Lithium-Ion Batteries During Formation] (DOI to be added) which can be used to design predictive yet interpretable features for cycle life prediction based only on experimental data during the formation step. Processed data can be found at Zenodo at 10.5281/zenodo.14916092.
+This repository contains the software accompanying the paper [Systematic Feature Design for Cycle Life Prediction of Lithium-Ion Batteries During Formation](https://doi.org/10.1016/j.joule.2025.101884) which can be used to design predictive yet interpretable features for cycle life prediction based only on experimental data during the formation step. Processed data can be found at Zenodo at [10.5281/zenodo.14916092](https://doi.org/10.5281/zenodo.14916092).
 
 ![framework_v4](https://github.com/user-attachments/assets/af8c1326-84ac-4f3c-b7e3-1031835772b9)
 
