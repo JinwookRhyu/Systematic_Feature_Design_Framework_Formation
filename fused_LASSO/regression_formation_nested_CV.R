@@ -37,9 +37,9 @@ pacman::p_load(pacman,
                tibble)
 
 # Please change this to the user's repository
-path_base <-
-  "C:/Users/Jinwook/PyCharm_projects/HDRegAnalytics-main/"
-source(paste(path_base, "regression_in_R/utils_formation_nested_CV.R", sep = ""))
+path_base <- getwd() # Current directory
+source(paste(path_base, "/utils_formation_nested_CV.R", sep = ""))
+dir.create(paste(path_base, "/regression_in_R", sep = ""))
 
 for (id_log in 1:2){
   if_logtransform <- if_logtransform_list[id_log]
@@ -48,7 +48,7 @@ for (id_log in 1:2){
     set.seed(42)
 
     ## Load Data
-    path <- paste(path_base, paste(paste("data_formation/",data_type, sep = ""),"_all.xlsx", sep = ""), sep = "")
+    path <- paste(path_base, paste(paste("/data_formation/",data_type, sep = ""),"_all.xlsx", sep = ""), sep = "")
     formation_data = import(path)
     
 
@@ -73,7 +73,7 @@ for (id_log in 1:2){
         write.csv(lm_df,
                 paste(
                   path_base,
-                  paste(paste(paste(paste("regression_in_R/log_",data_type, sep = ""),"_cv_lossmatrix_outer", sep = ""), id_outer, sep = ""), ".csv", sep=""),
+                  paste(paste(paste(paste("/regression_in_R/log_",data_type, sep = ""),"_cv_lossmatrix_outer", sep = ""), id_outer, sep = ""), ".csv", sep=""),
                   sep = ""
                 ))
         } else {
@@ -82,7 +82,7 @@ for (id_log in 1:2){
         write.csv(lm_df,
                 paste(
                   path_base,
-                  paste(paste(paste(paste("regression_in_R/",data_type, sep = ""),"_cv_lossmatrix_outer", sep = ""), id_outer, sep = ""), ".csv", sep=""),
+                  paste(paste(paste(paste("/regression_in_R/",data_type, sep = ""),"_cv_lossmatrix_outer", sep = ""), id_outer, sep = ""), ".csv", sep=""),
                   sep = ""
                 ))
     }
