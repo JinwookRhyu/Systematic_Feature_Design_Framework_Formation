@@ -39,7 +39,9 @@ pacman::p_load(pacman,
 # Please change this to the user's repository
 path_base <- getwd() # Current directory
 source(paste(path_base, "/utils_formation_nested_CV.R", sep = ""))
-dir.create(paste(path_base, "/regression_in_R", sep = ""))
+if (!dir.exists(paste(path_base, "/regression_in_R", sep = ""))) {
+  dir.create(paste(path_base, "/regression_in_R", sep = ""))
+}
 
 for (id_log in 1:2){
   if_logtransform <- if_logtransform_list[id_log]
@@ -50,19 +52,20 @@ for (id_log in 1:2){
     ## Load Data
     path <- paste(path_base, paste(paste("/data_formation/",data_type, sep = ""),"_all.xlsx", sep = ""), sep = "")
     formation_data = import(path)
+    numcol = dim(formation_data)[2]
     
 
     for (id_outer in 0:4){
       ## Construct Data Matrices
-      test_id_outer <- formation_data[, 1004] == id_outer
-      train_id_outer <- formation_data[, 1004] != id_outer
+      test_id_outer <- formation_data[, numcol] == id_outer
+      train_id_outer <- formation_data[, numcol] != id_outer
 
       nfolds <- 5
-      foldid <- match(formation_data[train_id_outer,1003], sort(unique(formation_data[train_id_outer,1003]))) %% nfolds
+      foldid <- match(formation_data[train_id_outer,(numcol-1)], sort(unique(formation_data[train_id_outer,(numcol-1)]))) %% nfolds
 
-      X <- unname(as.matrix(rev(formation_data[train_id_outer, 2:1001])))
-      y <- formation_data[train_id_outer, 1002]
-      protocols <- formation_data[train_id_outer, 1003]
+      X <- unname(as.matrix(rev(formation_data[train_id_outer, 2:(numcol-3)])))
+      y <- formation_data[train_id_outer, (numcol-2)]
+      protocols <- formation_data[train_id_outer, (numcol-1)]
 
       cv_list = cv_fusedlasso(X, y, foldid, if_logtransform, obj_fun)
         
