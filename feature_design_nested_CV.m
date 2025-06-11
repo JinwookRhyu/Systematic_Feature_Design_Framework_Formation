@@ -32,21 +32,22 @@ else
     filename = data_type + "_metrics.mat";
 end
 
+X_raw = xlsread("data_formation/" + data_type + "_all.xlsx");
+X_raw = X_raw(2:end, 2:end);
+y = X_raw(:, end-2);
+protocols = X_raw(:, end-1);
+loop = X_raw(:, end);
+n_indices = size(X_raw,2)-3;
+
 % Check which variable is used as x in f(x)
 ccc = char(data_type);
 if ccc(end) == "V"
-    X_label = linspace(3, 4.4, 1000);
+    X_label = linspace(3, 4.4, n_indices);
     xlabel_name = "V";
 elseif ccc(end) == "t"
-    X_label = flip(1:1000)/1000;
+    X_label = flip(1:n_indices)/n_indices;
     xlabel_name = "\tilde{t}";
 end
-
-X_raw = xlsread("data_formation/" + data_type + "_all.xlsx");
-X_raw = X_raw(2:end, 2:end);
-y = X_raw(:, 1001);
-protocols = X_raw(:, 1002);
-loop = X_raw(:, 1003);
 
 % Print dummy errors
 % cal_MAPE(y(loop == 0), mean(y(loop ~= 0)))
@@ -84,7 +85,7 @@ if ~isfile(filename)
     
     lossmatrix_list = nan * ones(nfolds_outer, nfolds_inner, size(lossmatrix_raw, 2)-1);
     lambda_list = nan * ones(nfolds_outer, size(lossmatrix_raw, 2)-1);
-    beta_FL_list = nan * ones(nfolds_outer, nfolds_inner, 1000, size(lossmatrix_raw, 2)-1);
+    beta_FL_list = nan * ones(nfolds_outer, nfolds_inner, n_indices, size(lossmatrix_raw, 2)-1);
 
 
     for id_outer = 1:nfolds_outer
@@ -106,14 +107,14 @@ if ~isfile(filename)
         test_id_outer = X_raw(:, end) == id_outer-1;
         train_id_outer = X_raw(:, end) ~= id_outer-1;
 
-        [~, ~, foldid_outer] = unique(X_raw(train_id_outer,1002));
+        [~, ~, foldid_outer] = unique(X_raw(train_id_outer,end-1));
         foldid_outer = mod(foldid_outer, nfolds_outer);
 
         for id_inner = 1:nfolds_inner
            
-            X = flip(X_raw(:, 1:1000), 2);
-            y = X_raw(:, 1001);
-            protocols = X_raw(:, 1002);
+            X = flip(X_raw(:, 1:n_indices), 2);
+            y = X_raw(:, end-2);
+            protocols = X_raw(:, end-1);
 
             X_test_outer = X(test_id_outer, :);
             X_train_outer = X(train_id_outer, :);
@@ -284,13 +285,13 @@ for m = 1:nfolds_outer
         test_id_outer = X_raw(:, end) == id_outer-1;
         train_id_outer = X_raw(:, end) ~= id_outer-1;
         
-        X = flip(X_raw(:, 1:1000), 2);
+        X = flip(X_raw(:, 1:n_indices), 2);
         
-        protocols = X_raw(:, 1002);
+        protocols = X_raw(:, end-1);
         X_test_outer = X(test_id_outer, :);
         X_train_outer = X(train_id_outer, :);
-        y_train_outer = X_raw(train_id_outer, 1001);
-        y_test_outer = X_raw(test_id_outer, 1001);
+        y_train_outer = X_raw(train_id_outer, end-2);
+        y_test_outer = X_raw(test_id_outer, end-2);
         if if_logtransform
             y_train_outer = log(y_train_outer);
             y_test_outer = log(y_test_outer);
@@ -311,7 +312,7 @@ for m = 1:nfolds_outer
         y_train_std = (y_train - y_train_C) ./ y_train_S;
         y_test_std = (y_test - y_train_C) ./ y_train_S;
 
-        [~, ~, foldid_outer] = unique(X_raw(train_id_outer,1002));
+        [~, ~, foldid_outer] = unique(X_raw(train_id_outer,end-1));
         foldid_outer = mod(foldid_outer, nfolds_outer);
 
         nexttile(7,[2 3])
@@ -325,7 +326,7 @@ for m = 1:nfolds_outer
             lambda = lambda_list(id_outer, lambda_show(kk));
             cvx_begin
                 variable beta_FL(1000,1)
-                minimize(0.5*sum((y_train_std - X_train_cen * beta_FL).^2) + lambda * norm(beta_FL(1:999) - beta_FL(2:1000), 1))
+                minimize(0.5*sum((y_train_std - X_train_cen * beta_FL).^2) + lambda * norm(beta_FL(1:n_indices-1) - beta_FL(2:n_indices), 1))
             cvx_end
             if kk == length(lambda_show)
                 plot(X_label, beta_FL, 'Color', cmap_black(length(lambda_show)+1-kk, :), 'LineWidth', 5, 'DisplayName', "\beta at \lambda = " + num2str(round(lambda, 4))) 
@@ -404,13 +405,13 @@ for m = 1:nfolds_outer
 
         test_id_outer = X_raw(:, end) == id_outer-1;
         train_id_outer = X_raw(:, end) ~= id_outer-1;
-        X = flip(X_raw(:, 1:1000), 2);
+        X = flip(X_raw(:, 1:n_indices), 2);
         
-        protocols = X_raw(:, 1002);
+        protocols = X_raw(:, end-1);
         X_test_outer = X(test_id_outer, :);
         X_train_outer = X(train_id_outer, :);
-        y_train_outer = X_raw(train_id_outer, 1001);
-        y_test_outer = X_raw(test_id_outer, 1001);
+        y_train_outer = X_raw(train_id_outer, end-2);
+        y_test_outer = X_raw(test_id_outer, end-2);
         if if_logtransform
             y_train_outer = log(y_train_outer);
             y_test_outer = log(y_test_outer);
@@ -431,7 +432,7 @@ for m = 1:nfolds_outer
         y_train_std = (y_train - y_train_C) ./ y_train_S;
         y_test_std = (y_test - y_train_C) ./ y_train_S;
 
-        [~, ~, foldid_outer] = unique(X_raw(train_id_outer,1002));
+        [~, ~, foldid_outer] = unique(X_raw(train_id_outer,end-1));
         foldid_outer = mod(foldid_outer, nfolds_outer);
         
         % Reconstruct beta using all training set of the outer fold at the determined lambda
@@ -439,12 +440,12 @@ for m = 1:nfolds_outer
         lambda = lambda_list(id_outer, lambda_ind);
         cvx_begin
             variable beta_FL(1000,1)
-            minimize(0.5*sum((y_train_std - X_train_cen * beta_FL).^2) + lambda * norm(beta_FL(1:999) - beta_FL(2:1000), 1))
+            minimize(0.5*sum((y_train_std - X_train_cen * beta_FL).^2) + lambda * norm(beta_FL(1:n_indices-1) - beta_FL(2:n_indices), 1))
         cvx_end
         
         % Find partition boundaries as in Figure 3A
         x0_filtered = find_x0_filtered(beta_FL);
-        x0 = [1; x0_filtered; 1000];
+        x0 = [1; x0_filtered; n_indices];
         round(X_label(x0), 2)
         
         % Provide labels for each boundary
@@ -498,7 +499,7 @@ for m = 1:nfolds_outer
             end
         end
         
-        X = X_raw(train_id_outer, 1:1000);
+        X = X_raw(train_id_outer, 1:n_indices);
         dXdV = [zeros(size(X,1), 1), X(:, 1:end-1) - X(:, 2:end)];
         d2XdV2 = [zeros(size(dXdV,1), 1), dXdV(:, 1:end-1) - dXdV(:, 2:end)];
         
