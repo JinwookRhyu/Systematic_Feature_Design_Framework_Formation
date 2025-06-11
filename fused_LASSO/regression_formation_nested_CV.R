@@ -37,10 +37,10 @@ pacman::p_load(pacman,
                tibble)
 
 # Please change this to the user's repository
-path_base <- getwd() # Current directory
-source(paste(path_base, "/utils_formation_nested_CV.R", sep = ""))
-if (!dir.exists(paste(path_base, "/regression_in_R", sep = ""))) {
-  dir.create(paste(path_base, "/regression_in_R", sep = ""))
+path_base <- setwd('C:/Users/Jinwook/PyCharm_projects/Systematic_Feature_Design_Framework_Formation-main') # Directory of "Systematic_Feature_Design_Framework_Formation-main"
+source(paste(path_base, "/fused_LASSO/utils_formation_nested_CV.R", sep = ""))
+if (!dir.exists(paste(path_base, "/results_fusedlasso", sep = ""))) {
+  dir.create(paste(path_base, "/results_fusedlasso", sep = ""))
 }
 
 for (id_log in 1:2){
@@ -76,7 +76,7 @@ for (id_log in 1:2){
         write.csv(lm_df,
                 paste(
                   path_base,
-                  paste(paste(paste(paste("/regression_in_R/log_",data_type, sep = ""),"_cv_lossmatrix_outer", sep = ""), id_outer, sep = ""), ".csv", sep=""),
+                  paste(paste(paste(paste("/results_fusedlasso/log_",data_type, sep = ""),"_cv_lossmatrix_outer", sep = ""), id_outer, sep = ""), ".csv", sep=""),
                   sep = ""
                 ))
         } else {
@@ -85,7 +85,7 @@ for (id_log in 1:2){
         write.csv(lm_df,
                 paste(
                   path_base,
-                  paste(paste(paste(paste("/regression_in_R/",data_type, sep = ""),"_cv_lossmatrix_outer", sep = ""), id_outer, sep = ""), ".csv", sep=""),
+                  paste(paste(paste(paste("/results_fusedlasso/",data_type, sep = ""),"_cv_lossmatrix_outer", sep = ""), id_outer, sep = ""), ".csv", sep=""),
                   sep = ""
                 ))
     }

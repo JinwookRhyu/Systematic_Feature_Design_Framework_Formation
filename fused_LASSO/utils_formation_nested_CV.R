@@ -307,7 +307,7 @@ cv_fusedlasso <-
           write.csv(lm_df,
                   paste(
                     path_base,
-                    paste(paste(paste(paste(paste(paste("/regression_in_R/log_",data_type, sep = ""),"_betamatrix_outer", sep = ""), id_outer, sep = ""), "_inner", sep=""), id_inner, sep=""), ".csv", sep = ""),
+                    paste(paste(paste(paste(paste(paste("/results_fusedlasso/log_",data_type, sep = ""),"_betamatrix_outer", sep = ""), id_outer, sep = ""), "_inner", sep=""), id_inner, sep=""), ".csv", sep = ""),
                     sep = ""
                   ))
 
@@ -328,7 +328,7 @@ cv_fusedlasso <-
           write.csv(lm_df,
                   paste(
                     path_base,
-                    paste(paste(paste(paste(paste(paste("/regression_in_R/",data_type, sep = ""),"_betamatrix_outer", sep = ""), id_outer, sep = ""), "_inner", sep=""), id_inner, sep=""), ".csv", sep = ""),
+                    paste(paste(paste(paste(paste(paste("/results_fusedlasso/",data_type, sep = ""),"_betamatrix_outer", sep = ""), id_outer, sep = ""), "_inner", sep=""), id_inner, sep=""), ".csv", sep = ""),
                     sep = ""
                   ))
         }
