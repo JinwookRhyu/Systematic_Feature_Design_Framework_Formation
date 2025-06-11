@@ -325,7 +325,7 @@ for m = 1:nfolds_outer
         for kk = 1:length(lambda_show)
             lambda = lambda_list(id_outer, lambda_show(kk));
             cvx_begin
-                variable beta_FL(1000,1)
+                variable beta_FL(n_indices,1)
                 minimize(0.5*sum((y_train_std - X_train_cen * beta_FL).^2) + lambda * norm(beta_FL(1:n_indices-1) - beta_FL(2:n_indices), 1))
             cvx_end
             if kk == length(lambda_show)
@@ -439,7 +439,7 @@ for m = 1:nfolds_outer
         lambda_ind = chosen_lambda_ind;
         lambda = lambda_list(id_outer, lambda_ind);
         cvx_begin
-            variable beta_FL(1000,1)
+            variable beta_FL(n_indices,1)
             minimize(0.5*sum((y_train_std - X_train_cen * beta_FL).^2) + lambda * norm(beta_FL(1:n_indices-1) - beta_FL(2:n_indices), 1))
         cvx_end
         
