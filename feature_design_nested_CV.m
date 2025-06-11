@@ -6,7 +6,8 @@ data_type = "B_Q_V"; % Data type
 legend_position = 'northwest'; % legend location
 plot_ylim = [-1.2, 1.2]; % ylim for plot
 if_logtransform = true; % Whether to log-transform the data or not
-id_outer_list = 1:5; % Index for outer loops
+nfolds_outer = 5; % Number of outer loops
+nfolds_inner = 5; % Number of inner loops
 num_lambda_show = 10; % Number of lamdas to plot
 if_savematrix = true; % Whether to save the dataset of selected features
 
@@ -68,45 +69,47 @@ if ~isfile(filename)
         lossmatrix_name = data_type + "_cv_lossmatrix_outer";
     end
 
-    MAPE_train_list = nan * ones(5, 5, 2000);
-    RMSE_train_list = nan * ones(5, 5, 2000);
-    MAPE_test_list = nan * ones(5, 5, 2000);
-    RMSE_test_list = nan * ones(5, 5, 2000);
-    MAPE_dummy = nan * ones(5, 5);
-    RMSE_dummy = nan * ones(5, 5);
-    dtw_ratio_beta_list = nan * ones(5, 5, 2000);
-    dtw_ratio_others_list = nan * ones(5, 5, 2000);
-    path_length_list = nan * ones(5, 5, 2000);
+    % To get the number of lambdas used in the fused lasso work
+    lossmatrix_raw = xlsread("results_fusedlasso/" + lossmatrix_name + "0.csv");
+
+    MAPE_train_list = nan * ones(nfolds_outer, nfolds_inner, size(lossmatrix_raw, 2)-1);
+    RMSE_train_list = nan * ones(nfolds_outer, nfolds_inner, size(lossmatrix_raw, 2)-1);
+    MAPE_test_list = nan * ones(nfolds_outer, nfolds_inner, size(lossmatrix_raw, 2)-1);
+    RMSE_test_list = nan * ones(nfolds_outer, nfolds_inner, size(lossmatrix_raw, 2)-1);
+    MAPE_dummy = nan * ones(nfolds_outer, nfolds_inner);
+    RMSE_dummy = nan * ones(nfolds_outer, nfolds_inner);
+    dtw_ratio_beta_list = nan * ones(nfolds_outer, nfolds_inner, size(lossmatrix_raw, 2)-1);
+    dtw_ratio_others_list = nan * ones(nfolds_outer, nfolds_inner, size(lossmatrix_raw, 2)-1);
+    path_length_list = nan * ones(nfolds_outer, nfolds_inner, size(lossmatrix_raw, 2)-1);
     
-    lossmatrix_list = nan * ones(5, 5, 2000);
-    lambda_list = nan * ones(5, 2000);
-    beta_FL_list = nan * ones(5, 5, 1000, 2000);
+    lossmatrix_list = nan * ones(nfolds_outer, nfolds_inner, size(lossmatrix_raw, 2)-1);
+    lambda_list = nan * ones(nfolds_outer, size(lossmatrix_raw, 2)-1);
+    beta_FL_list = nan * ones(nfolds_outer, nfolds_inner, 1000, size(lossmatrix_raw, 2)-1);
 
 
-    for id_outer = 1:5
+    for id_outer = 1:nfolds_outer
         lossmatrix_raw = xlsread("results_fusedlasso/" + lossmatrix_name + num2str(id_outer-1) + ".csv");
         n_lambda = sum(max(lossmatrix_raw(2:end, 2:end)) < 1e6);
-        for id_inner = 1:5
+        for id_inner = 1:nfolds_inner
             beta_raw = xlsread("results_fusedlasso/" + beta_name + num2str(id_outer-1) + "_inner" + num2str(id_inner-1) + ".csv");
             beta_FL_list(id_outer, id_inner, :, 1:n_lambda) = beta_raw(2:end, 2:n_lambda+1);
         end
         lambda_list(id_outer, 1:n_lambda) = lossmatrix_raw(1, 2:n_lambda+1);
-        lossmatrix_list(id_outer, :, 1:n_lambda) = lossmatrix_raw(2:6, 2:n_lambda+1);
+        lossmatrix_list(id_outer, :, 1:n_lambda) = lossmatrix_raw(2:end, 2:n_lambda+1);
     end
 
-    for id_outer = 1:5
+    for id_outer = 1:nfolds_outer
         data = squeeze(lossmatrix_list(id_outer, :, :));
-        lossmatrix = reshape(data(~isnan(data)), 5, []);
+        lossmatrix = reshape(data(~isnan(data)), nfolds_inner, []);
         n_lambda = size(lossmatrix,2);
 
         test_id_outer = X_raw(:, end) == id_outer-1;
         train_id_outer = X_raw(:, end) ~= id_outer-1;
 
-        nfolds_outer = 5;
         [~, ~, foldid_outer] = unique(X_raw(train_id_outer,1002));
         foldid_outer = mod(foldid_outer, nfolds_outer);
 
-        for id_inner = 1:5
+        for id_inner = 1:nfolds_inner
            
             X = flip(X_raw(:, 1:1000), 2);
             y = X_raw(:, 1001);
@@ -165,8 +168,8 @@ if ~isfile(filename)
 
         end
 
-        [dtw_ratio_beta_list(id_outer, :, 1:n_lambda), dtw_ratio_others_list(id_outer, :, 1:n_lambda)] = cal_dtw_ratio(squeeze(beta_FL_list(id_outer, :, :, 1:n_lambda)));
-        path_length_list(id_outer, :, 1:n_lambda) = cal_path_length(squeeze(beta_FL_list(id_outer, :, :, 1:n_lambda)));
+        [dtw_ratio_beta_list(id_outer, :, 1:n_lambda), dtw_ratio_others_list(id_outer, :, 1:n_lambda)] = cal_dtw_ratio(squeeze(beta_FL_list(id_outer, :, :, 1:n_lambda)), nfolds_inner);
+        path_length_list(id_outer, :, 1:n_lambda) = cal_path_length(squeeze(beta_FL_list(id_outer, :, :, 1:n_lambda)), nfolds_inner);
     
     end
 
@@ -176,13 +179,13 @@ end
 %% Determine whether the blue region exists
 load(filename)
 
-chosen_lambda_inds = nan * ones(length(id_outer_list), 1);
+chosen_lambda_inds = nan * ones(nfolds_outer, 1);
 
 % For each fold in outer loop
-for m = 1:length(id_outer_list)
-    id_outer = id_outer_list(m);
+for m = 1:nfolds_outer
+    id_outer = m;
     data = squeeze(lossmatrix_list(id_outer, :, :));
-    lossmatrix = reshape(data(~isnan(data)), 5, []);
+    lossmatrix = reshape(data(~isnan(data)), nfolds_inner, []);
     n_lambda = size(lossmatrix,2);
     ind_lambda_init = find(lambda_list(id_outer, :) < max_lambda, 1);
     min_lambda = 10^floor(log10(min(lambda_list(id_outer,:))));
@@ -191,7 +194,7 @@ for m = 1:length(id_outer_list)
     mean_MAPE = mean(squeeze(MAPE_test_list(id_outer, :, 1:n_lambda)));
     [min_MAPE, ind_min_MAPE] = min(mean_MAPE);
     % Predictiveness threshold as in Table S2
-    threshold_MAPE = min_MAPE + std(squeeze(MAPE_test_list(id_outer, :, ind_min_MAPE))) / sqrt(5);
+    threshold_MAPE = min_MAPE + std(squeeze(MAPE_test_list(id_outer, :, ind_min_MAPE))) / sqrt(nfolds_inner);
 
     % Calculate robustness and interpretability metrics
     max_dtw_ratio_others = max(squeeze(dtw_ratio_others_list(id_outer, :, 1:n_lambda)));
@@ -207,7 +210,7 @@ for m = 1:length(id_outer_list)
     figure(); clf();
     t = tiledlayout(3,6);
     nexttile(1,[1 2])
-    for id_inner = 1:5
+    for id_inner = 1:nfolds_inner
         legend_name = "Inner " + num2str(id_inner);
         plot(lambda_list(id_outer, ind_lambda_init:n_lambda), squeeze(MAPE_test_list(id_outer,id_inner,ind_lambda_init:n_lambda)), 'Color', cmap(id_inner, :), 'LineWidth', 2, 'DisplayName', legend_name);
         hold on;
@@ -226,7 +229,7 @@ for m = 1:length(id_outer_list)
     plot_bluebox(alarm_total, squeeze(lambda_list(id_outer, :)), xlim, ylim)
 
     nexttile(3,[1 2])
-    for id_inner = 1:5
+    for id_inner = 1:nfolds_inner
         legend_name = "Inner " + num2str(id_inner);
         plot(lambda_list(id_outer, ind_lambda_init:n_lambda), squeeze(dtw_ratio_others_list(id_outer,id_inner,ind_lambda_init:n_lambda)), 'Color', cmap(id_inner, :), 'LineWidth', 2, 'DisplayName', legend_name);
         hold on;
@@ -245,7 +248,7 @@ for m = 1:length(id_outer_list)
     plot_bluebox(alarm_total, squeeze(lambda_list(id_outer, :)), xlim, ylim)
 
     nexttile(5,[1 2])
-    for id_inner = 1:5
+    for id_inner = 1:nfolds_inner
         legend_name = "Inner " + num2str(id_inner);
         plot(lambda_list(id_outer, ind_lambda_init:n_lambda), squeeze(path_length_list(id_outer,id_inner,ind_lambda_init:n_lambda)), 'Color', cmap(id_inner, :), 'LineWidth', 2, 'DisplayName', legend_name);
         hold on;
@@ -308,7 +311,6 @@ for m = 1:length(id_outer_list)
         y_train_std = (y_train - y_train_C) ./ y_train_S;
         y_test_std = (y_test - y_train_C) ./ y_train_S;
 
-        nfolds_outer = 5;
         [~, ~, foldid_outer] = unique(X_raw(train_id_outer,1002));
         foldid_outer = mod(foldid_outer, nfolds_outer);
 
@@ -352,7 +354,7 @@ for m = 1:length(id_outer_list)
 
         % Plot beta's at each inner loop with the optimal lambda as in Figure S5e
         nexttile(10,[2 3])
-        for id_inner = 1:5
+        for id_inner = 1:nfolds_inner
             legend_name = "\beta^{(" + num2str(id_inner) + ")} at \lambda = " + num2str(round(lambda_list(id_outer, max(ind_normal)), 4));
             plot(X_label, squeeze(beta_FL_list(id_outer, id_inner, :, max(ind_normal))), 'Color', cmap(id_inner, :), 'LineWidth', 2, 'DisplayName', legend_name);
             hold on
@@ -384,14 +386,14 @@ for m = 1:length(id_outer_list)
 
 end
 
-MAPE_train_final = nan * ones(length(id_outer_list),1);
-MAPE_test_final = nan * ones(length(id_outer_list),1);
-RMSE_train_final = nan * ones(length(id_outer_list),1);
-RMSE_test_final = nan * ones(length(id_outer_list),1);
+MAPE_train_final = nan * ones(nfolds_outer,1);
+MAPE_test_final = nan * ones(nfolds_outer,1);
+RMSE_train_final = nan * ones(nfolds_outer,1);
+RMSE_test_final = nan * ones(nfolds_outer,1);
 
 %% Proceed feature design for the outer loops where the blue region exists
-for m = 1:length(id_outer_list)
-    id_outer = id_outer_list(m);
+for m = 1:nfolds_outer
+    id_outer = m;
     chosen_lambda_ind = chosen_lambda_inds(m);
     
     % If the blue region exists
@@ -429,7 +431,6 @@ for m = 1:length(id_outer_list)
         y_train_std = (y_train - y_train_C) ./ y_train_S;
         y_test_std = (y_test - y_train_C) ./ y_train_S;
 
-        nfolds_outer = 5;
         [~, ~, foldid_outer] = unique(X_raw(train_id_outer,1002));
         foldid_outer = mod(foldid_outer, nfolds_outer);
         
@@ -455,14 +456,14 @@ for m = 1:length(id_outer_list)
         xticklabelname = [{"3.0V"}, xticklabelname{1:(length(x0)-2)}, {"4.4V"}];
         
         % Merge sections if the boundary is not necessary. Iterate until there is no more boundary to remove.
-        [xticklabelname_new, x0_new] = determine_merge(X_train_outer, x0, foldid_outer, X_raw, beta_FL, xticklabelname, merge_threshold, true);
+        [xticklabelname_new, x0_new] = determine_merge(X_train_outer, x0, foldid_outer, X_raw, beta_FL, xticklabelname, merge_threshold, true, nfolds_inner);
 
         while length(x0_new) < length(x0)
             x0 = x0_new;
             xticklabelname = xticklabelname_new;
-            [xticklabelname_new, x0_new] = determine_merge(X_train_outer, x0, foldid_outer, X_raw, beta_FL, xticklabelname, merge_threshold, false);
+            [xticklabelname_new, x0_new] = determine_merge(X_train_outer, x0, foldid_outer, X_raw, beta_FL, xticklabelname, merge_threshold, false, nfolds_inner);
         end
-        [xticklabelname_merge, x0_merge] = determine_merge(X_train_outer, x0, foldid_outer, X_raw, beta_FL, xticklabelname, merge_threshold, true);
+        [xticklabelname_merge, x0_merge] = determine_merge(X_train_outer, x0, foldid_outer, X_raw, beta_FL, xticklabelname, merge_threshold, true, nfolds_inner);
         round(X_label(x0_merge), 2)
        
         % Generate "difference" and "mean" features for the final boundaries
@@ -658,17 +659,17 @@ function RMSE = cal_RMSE(y, y_pred)
 end
 
 
-function [dtw_ratio_beta, dtw_ratio_others] = cal_dtw_ratio(beta_list)
+function [dtw_ratio_beta, dtw_ratio_others] = cal_dtw_ratio(beta_list, nfolds_inner)
     % Calculate the ratio of dynamic time warping distance (i.e., robustness metric)
     n_lambda = size(beta_list,3);
-    dtw_list = nan * ones(5,n_lambda);
-    dtw_0_list = nan * ones(5,n_lambda);
-    dtw_0_others_list = nan * ones(5,n_lambda);
+    dtw_list = nan * ones(nfolds_inner,n_lambda);
+    dtw_0_list = nan * ones(nfolds_inner,n_lambda);
+    dtw_0_others_list = nan * ones(nfolds_inner,n_lambda);
     for id_lambda = 1:n_lambda
-        for id_inner = 1:5
-            dtw_list(id_inner, id_lambda) = dtw(beta_list(id_inner, :, id_lambda),mean(beta_list(1:5 ~= id_inner, :, id_lambda), 1));
+        for id_inner = 1:nfolds_inner
+            dtw_list(id_inner, id_lambda) = dtw(beta_list(id_inner, :, id_lambda),mean(beta_list(1:nfolds_inner ~= id_inner, :, id_lambda), 1));
             dtw_0_list(id_inner, id_lambda) = dtw(beta_list(id_inner, :, id_lambda),zeros(size(beta_list,2), 1));
-            dtw_0_others_list(id_inner, id_lambda) = dtw(mean(beta_list(1:5 ~= id_inner, :, id_lambda), 1), zeros(size(beta_list,2), 1));
+            dtw_0_others_list(id_inner, id_lambda) = dtw(mean(beta_list(1:nfolds_inner ~= id_inner, :, id_lambda), 1), zeros(size(beta_list,2), 1));
         end
     end
     dtw_ratio_beta = dtw_list ./ dtw_0_list;
@@ -683,12 +684,12 @@ function x0_filtered = find_x0_filtered(beta)
     x0_filtered = find(im_x0);
 end
 
-function path_length = cal_path_length(beta_list)
+function path_length = cal_path_length(beta_list, nfolds_inner)
     % Calculate path length (i.e., interpretability metric)
     n_lambda = size(beta_list,3);
-    path_length = nan * ones(5, n_lambda);
+    path_length = nan * ones(nfolds_inner, n_lambda);
     for id_lambda = 1:n_lambda
-        for id_inner = 1:5
+        for id_inner = 1:nfolds_inner
             path_length(id_inner, id_lambda) = sum(abs(diff(beta_list(id_inner, :, id_lambda))));
         end
     end
@@ -761,21 +762,21 @@ function plot_dottedline(alarm, lambdas, xl, yl)
 end
 
 
-function [xticklabelname, x0] = determine_merge(X_train_outer, x0, foldid_outer, X_raw, beta_avg, xticklabelname, merge_threshold, if_plot)
+function [xticklabelname, x0] = determine_merge(X_train_outer, x0, foldid_outer, X_raw, beta_avg, xticklabelname, merge_threshold, if_plot, nfolds_inner)
     % Merge sections as in Algorithm S1
-    MAPE_train_list_1 = nan * ones(5, length(x0)-1);
-    RMSE_train_list_1 = nan * ones(5, length(x0)-1);
-    NRMSE_train_list_1 = nan * ones(5, length(x0)-1);
-    MAPE_test_list_1 = nan * ones(5, length(x0)-1);
-    RMSE_test_list_1 = nan * ones(5, length(x0)-1);
-    NRMSE_test_list_1 = nan * ones(5, length(x0)-1);
+    MAPE_train_list_1 = nan * ones(nfolds_inner, length(x0)-1);
+    RMSE_train_list_1 = nan * ones(nfolds_inner, length(x0)-1);
+    NRMSE_train_list_1 = nan * ones(nfolds_inner, length(x0)-1);
+    MAPE_test_list_1 = nan * ones(nfolds_inner, length(x0)-1);
+    RMSE_test_list_1 = nan * ones(nfolds_inner, length(x0)-1);
+    NRMSE_test_list_1 = nan * ones(nfolds_inner, length(x0)-1);
     
-    MAPE_train_list_2 = nan * ones(5, length(x0)-2);
-    RMSE_train_list_2 = nan * ones(5, length(x0)-2);
-    NRMSE_train_list_2 = nan * ones(5, length(x0)-2);
-    MAPE_test_list_2 = nan * ones(5, length(x0)-2);
-    RMSE_test_list_2 = nan * ones(5, length(x0)-2);
-    NRMSE_test_list_2 = nan * ones(5, length(x0)-2);
+    MAPE_train_list_2 = nan * ones(nfolds_inner, length(x0)-2);
+    RMSE_train_list_2 = nan * ones(nfolds_inner, length(x0)-2);
+    NRMSE_train_list_2 = nan * ones(nfolds_inner, length(x0)-2);
+    MAPE_test_list_2 = nan * ones(nfolds_inner, length(x0)-2);
+    RMSE_test_list_2 = nan * ones(nfolds_inner, length(x0)-2);
+    NRMSE_test_list_2 = nan * ones(nfolds_inner, length(x0)-2);
 
     for k = 1:length(x0)-1
         ind_init = x0(k);
@@ -784,7 +785,7 @@ function [xticklabelname, x0] = determine_merge(X_train_outer, x0, foldid_outer,
         X_selected = X_train_outer(:, ind_init:ind_end);
         X_features = [X_selected(:,end) - X_selected(:,1), mean(X_selected,2)];        
 
-        for id_inner = 1:5
+        for id_inner = 1:nfolds_inner
             
             test_id = foldid_outer == id_inner-1;
             train_id = foldid_outer ~= id_inner-1;
@@ -829,7 +830,7 @@ function [xticklabelname, x0] = determine_merge(X_train_outer, x0, foldid_outer,
         X_selected = X_train_outer(:, ind_init:ind_end);
         X_features = [X_selected(:,end) - X_selected(:,1), mean(X_selected,2)];
 
-        for id_inner = 1:5
+        for id_inner = 1:nfolds_inner
             
             test_id = foldid_outer == id_inner-1;
             train_id = foldid_outer ~= id_inner-1;
